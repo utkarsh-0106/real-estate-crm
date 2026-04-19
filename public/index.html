@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CRM Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .dashboard {
+      display: flex;
+      gap: 10px;
+    }
+
+    .box {
+      flex: 1;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .box:nth-child(1) { background: #2196F3; }
+    .box:nth-child(2) { background: #9C27B0; }
+    .box:nth-child(3) { background: #FF9800; }
+    .box:nth-child(4) { background: #4CAF50; }
+
+    input, select {
+      padding: 10px;
+      margin: 5px;
+      width: 28%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 15px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #45a049;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #fafafa;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status {
+      font-weight: bold;
+      color: #4CAF50;
+    }
+
+    /* Deal pipeline styling */
+    #inquiry li, #negotiation li, #closed li {
+      border-left: 4px solid #2196F3;
+    }
+
+    #negotiation li { border-left-color: #FF9800; }
+    #closed li { border-left-color: #4CAF50; }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🏠 Real Estate CRM</h1>
+
+  <!-- DASHBOARD -->
+  <div class="card">
+    <h2>Dashboard</h2>
+    <div class="dashboard" id="dashboard"></div>
+  </div>
+
+  <!-- ADD LEAD -->
+  <div class="card">
+    <h2>Add Lead</h2>
+    <input id="name" placeholder="Name" />
+    <input id="phone" placeholder="Phone" />
+    <button onclick="addLead()">Add</button>
+  </div>
+
+  <!-- LEADS -->
+  <div class="card">
+    <h2>Leads</h2>
+    <ul id="leads"></ul>
+  </div>
+
+  <!-- ADD PROPERTY -->
+  <div class="card">
+    <h2>Add Property</h2>
+    <input id="title" placeholder="Title" />
+    <input id="location" placeholder="Location" />
+    <input id="price" placeholder="Price" />
+    <button onclick="addProperty()">Add</button>
+  </div>
+
+  <!-- PROPERTIES -->
+  <div class="card">
+    <h2>Properties</h2>
+    <ul id="properties"></ul>
+  </div>
+
+  <!-- CREATE DEAL -->
+  <div class="card">
+    <h2>Create Deal</h2>
+    <select id="leadSelect"></select>
+    <select id="propertySelect"></select>
+    <button onclick="createDeal()">Create Deal</button>
+  </div>
+
+  <!-- DEAL PIPELINE -->
+  <div class="card">
+    <h2>Deals Pipeline</h2>
+    <div style="display:flex; gap:10px;">
+      
+      <div style="flex:1;">
+        <h3>Inquiry</h3>
+        <ul id="inquiry"></ul>
+      </div>
+
+      <div style="flex:1;">
+        <h3>Negotiation</h3>
+        <ul id="negotiation"></ul>
+      </div>
+
+      <div style="flex:1;">
+        <h3>Closed</h3>
+        <ul id="closed"></ul>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:5000/api";
+
+// DASHBOARD
+async function loadDashboard() {
+  const res = await fetch(API + "/dashboard");
+  const data = await res.json();
+
+  document.getElementById("dashboard").innerHTML = `
+    <div class="box">Leads<br>${data.totalLeads}</div>
+    <div class="box">Properties<br>${data.totalProperties}</div>
+    <div class="box">Deals<br>${data.totalDeals}</div>
+    <div class="box">Closed<br>${data.closedDeals}</div>
+  `;
+}
+
+// LEADS
+async function loadLeads() {
+  const res = await fetch(API + "/leads");
+  const data = await res.json();
+
+  const list = document.getElementById("leads");
+  list.innerHTML = "";
+
+  data.forEach(l => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${l.name} (${l.phone})</span>
+      <span class="status">${l.status}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+async function addLead() {
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+
+  await fetch(API + "/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, phone })
+  });
+
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+
+  loadLeads();
+  loadDashboard();
+  loadDropdowns();
+}
+
+// PROPERTIES
+async function loadProperties() {
+  const res = await fetch(API + "/properties");
+  const data = await res.json();
+
+  const list = document.getElementById("properties");
+  list.innerHTML = "";
+
+  data.forEach(p => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${p.title} - ₹${p.price}</span>
+      <span>${p.location}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+async function addProperty() {
+  const title = document.getElementById("title").value;
+  const location = document.getElementById("location").value;
+  const price = document.getElementById("price").value;
+
+  await fetch(API + "/properties", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, location, price })
+  });
+
+  document.getElementById("title").value = "";
+  document.getElementById("location").value = "";
+  document.getElementById("price").value = "";
+
+  loadProperties();
+  loadDashboard();
+  loadDropdowns();
+}
+
+// DEALS
+async function loadDeals() {
+  const res = await fetch(API + "/deals");
+  const deals = await res.json();
+
+  document.getElementById("inquiry").innerHTML = "";
+  document.getElementById("negotiation").innerHTML = "";
+  document.getElementById("closed").innerHTML = "";
+
+  deals.forEach(d => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span>${d.leadId?.name || "Lead"} → ${d.propertyId?.title || "Property"}</span>
+      <button onclick="updateDeal('${d._id}', '${d.stage}')">➡</button>
+    `;
+
+    if (d.stage === "Inquiry") {
+      document.getElementById("inquiry").appendChild(li);
+    } else if (d.stage === "Negotiation") {
+      document.getElementById("negotiation").appendChild(li);
+    } else {
+      document.getElementById("closed").appendChild(li);
+    }
+  });
+}
+
+async function updateDeal(id, currentStage) {
+  let nextStage = "Negotiation";
+
+  if (currentStage === "Negotiation") nextStage = "Closed";
+  if (currentStage === "Closed") nextStage = "Closed";
+
+  await fetch(API + "/deals/" + id, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ stage: nextStage })
+  });
+
+  loadDeals();
+  loadDashboard();
+}
+
+// DROPDOWNS
+async function loadDropdowns() {
+  const leads = await fetch(API + "/leads").then(r => r.json());
+  const properties = await fetch(API + "/properties").then(r => r.json());
+
+  const leadSelect = document.getElementById("leadSelect");
+  const propertySelect = document.getElementById("propertySelect");
+
+  leadSelect.innerHTML = "";
+  propertySelect.innerHTML = "";
+
+  leads.forEach(l => {
+    const opt = document.createElement("option");
+    opt.value = l._id;
+    opt.text = l.name;
+    leadSelect.appendChild(opt);
+  });
+
+  properties.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p._id;
+    opt.text = p.title;
+    propertySelect.appendChild(opt);
+  });
+}
+
+async function createDeal() {
+  const leadId = document.getElementById("leadSelect").value;
+  const propertyId = document.getElementById("propertySelect").value;
+
+  await fetch(API + "/deals", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ leadId, propertyId })
+  });
+
+  loadDeals();
+  loadDashboard();
+}
+
+// INITIAL LOAD
+loadDashboard();
+loadLeads();
+loadProperties();
+loadDeals();
+loadDropdowns();
+
+</script>
+
+</body>
+</html>
