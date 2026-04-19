@@ -56,6 +56,19 @@ http://localhost:5000
 
 ---
 
+## 📸 Screenshots
+
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Deal Pipeline
+![Pipeline](screenshots/pipeline.png)
+
+### Leads & Properties
+![Leads](screenshots/leads.png)
+
+---
+
 ## 📌 Note
 
 This project is built as an MVP focusing on core CRM workflows.
