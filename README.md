@@ -1,6 +1,7 @@
 # 🏠 Real Estate CRM System
 
 A full-stack CRM application for managing real estate leads, properties, and deal pipelines.
+Includes a simple web interface to demonstrate end-to-end CRM workflow.
 
 ---
 
@@ -26,11 +27,16 @@ A full-stack CRM application for managing real estate leads, properties, and dea
 
 ### 1. Clone the repository
 
-git clone https://github.com/YOUR_USERNAME/real-estate-crm.git
+```bash
+git clone https://github.com/utkarsh-0106/real-estate-crm.git
+cd real-estate-crm
+```
 
 ### 2. Install dependencies
 
+```bash
 npm install
+```
 
 ### 3. Start MongoDB locally
 
@@ -38,11 +44,15 @@ Make sure MongoDB is running on your system
 
 ### 4. Start the server
 
+```bash
 npx nodemon server.js
+```
 
 ### 5. Open in browser
 
+```
 http://localhost:5000
+```
 
 ---
 
@@ -59,12 +69,15 @@ http://localhost:5000
 ## 📸 Screenshots
 
 ### Dashboard
+
 ![Dashboard](screenshots/dashboard.png)
 
 ### Deal Pipeline
+
 ![Pipeline](screenshots/pipeline.png)
 
 ### Leads & Properties
+
 ![Leads](screenshots/leads.png)
 
 ---
